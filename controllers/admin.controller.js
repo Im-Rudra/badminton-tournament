@@ -1,0 +1,1 @@
+exports.verificationController = (req, res) => {};
