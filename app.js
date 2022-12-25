@@ -58,7 +58,7 @@ app.use('/', adminRouter);
 
 app.use((err, req, res, next) => {
   console.log(err.message);
-  const errObj = new ResponseMsg(true, err);
+  const errObj = new ResponseMsg(true, err.message);
   res.json(errObj);
 });
 

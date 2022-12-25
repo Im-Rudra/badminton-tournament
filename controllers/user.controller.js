@@ -1,6 +1,7 @@
 //  internal imports
 const User = require('../models/user.model');
 const ResponseMsg = require('../libs/responseMsg');
+const makeUserObj = require('../utilities/makeUserObj');
 
 //  external imports
 const bcrypt = require('bcrypt');
@@ -53,18 +54,10 @@ exports.loginController = async (req, res) => {
       const respMsg = new ResponseMsg(true, "Password Didn't match!");
       return res.json(respMsg);
     }
-    const { _id: id, name, role, paymentStatus, createdAt } = user;
-    const resObj = {
-      id,
-      name,
-      email: user.email,
-      phone: user.phone,
-      role,
-      paymentStatus,
-      createdAt
-    };
+    const { _id: id, name } = user;
+    const resObj = makeUserObj(user);
     //  jwt public object
-    const jwtObj = { id, name, email };
+    const jwtObj = { id, name, email: user?.email, phone: user?.phone };
     const jwtToken = jwt.sign(jwtObj, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRY
     });

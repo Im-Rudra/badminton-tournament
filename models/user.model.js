@@ -25,11 +25,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['Administrator', 'Moderator', 'User'],
       required: true
-    },
-    paymentStatus: {
-      type: String,
-      enum: ['Verified', 'Unverified'],
-      required: true
     }
   },
   { timestamps: true }

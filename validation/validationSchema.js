@@ -7,8 +7,7 @@ const schemas = {
     email: Joi.string().required().email(),
     phone: Joi.string().required().phoneNumber({ format: 'e164' }),
     password: Joi.string().required().min(6),
-    role: Joi.string().required().valid('Administrator', 'Moderator', 'User'),
-    paymentStatus: Joi.string().required().valid('Verified', 'Unverified')
+    role: Joi.string().required().valid('Administrator', 'Moderator', 'User')
   }),
   loginSchema: Joi.object({
     email: Joi.string().email(),
