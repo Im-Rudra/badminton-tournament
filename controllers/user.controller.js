@@ -39,38 +39,49 @@ exports.registrationController = async (req, res) => {
   }
 };
 
-exports.loginController = async (req, res) => {
+exports.loginController = async (req, res, next) => {
   try {
     const { email, phone, password } = req.body;
     const user = await User.findOne({ $or: [{ email }, { phone }] });
+
     if (!user) {
-      const respMsg = new ResponseMsg(true, 'User Not found');
-      return res.status(404).json(respMsg);
+      const error = new Error('User not found');
+      error.status = 404;
+      return next(error);
     }
+
     //  password matching
     const hashMatch = await bcrypt.compare(password, user.hash);
+
     //  if password is wrong
     if (!hashMatch) {
-      const respMsg = new ResponseMsg(true, "Password Didn't match!");
-      return res.json(respMsg);
+      const error = new Error('Wrong password!');
+      error.status = 403;
+      return next(error);
     }
+
     const { _id: id, name } = user;
-    const resObj = makeUserObj(user);
+
     //  jwt public object
     const jwtObj = { id, name, email: user?.email, phone: user?.phone };
     const jwtToken = jwt.sign(jwtObj, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRY
     });
+
     //  setting as signed cookie to the browser
     res.cookie(process.env.COOKIE_NAME, jwtToken, {
       maxAge: process.env.COOKIE_EXPIRY,
       httpOnly: true,
       signed: true
     });
+
     //  if everything is okey
+    const resObj = makeUserObj(user);
     res.json(resObj);
+    res.end();
   } catch (error) {
     console.log(error.message);
+    next(error);
   }
 };
 
@@ -80,5 +91,29 @@ exports.logoutController = async (req, res) => {
     res.json({ message: 'logout successful' });
   } catch (err) {
     console.log(err.message);
+  }
+};
+
+exports.getLoggedInUser = async (req, res, next) => {
+  const cookies = Object.keys(req.signedCookies).length > 0 ? req.signedCookies : null;
+
+  // if no cookies available
+  if (!cookies) {
+    return res.json(null).end();
+  }
+
+  try {
+    const token = cookies[process.env.COOKIE_NAME];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findOne({
+      $and: [{ _id: decoded.id }, { email: decoded.email }, { phone: decoded.phone }]
+    });
+
+    const userObj = makeUserObj(user);
+    res.json(userObj);
+    res.end();
+  } catch {
+    res.json(null).end();
   }
 };

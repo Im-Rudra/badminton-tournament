@@ -5,16 +5,16 @@ const express = require('express');
 const inputValidator = require('../validation');
 const userAuth = require('../authentication/user.auth');
 const moderatorAuth = require('../authentication/moderator.auth');
-const makeUserObj = require('../utilities/makeUserObj');
 const inputSchema = require('../validation/validationSchema');
 const {
   registrationController,
   loginController,
-  logoutController
+  logoutController,
+  getLoggedInUser
 } = require('../controllers/user.controller');
-const { checkLoggedIn } = require('../middlewares/login.middleware');
-const User = require('../models/user.model');
 const { getUsersController } = require('../controllers/admin.controller');
+const checkAuth = require('../authentication/auth');
+const authSchema = require('../authentication/auth.schema');
 
 const router = express.Router();
 
@@ -22,8 +22,10 @@ router.get('/', (req, res) => {
   res.send('getting successfully');
 });
 
+router.post('/getLoggedinUser', getLoggedInUser);
+
 //  protected route | admin and moderators can access this route
-router.post('/getUsers', moderatorAuth, getUsersController);
+router.post('/getUsers', checkAuth(authSchema, 'Administrator'), getUsersController);
 
 router.post('/login', inputValidator(inputSchema.loginSchema), loginController);
 

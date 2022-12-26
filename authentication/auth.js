@@ -3,18 +3,21 @@ const jwt = require('jsonwebtoken');
 
 //  internal imports
 const User = require('../models/user.model');
+const makeError = require('../utilities/error');
 
-const userAuth = async (req, _res, next) => {
+const checkAuth = (authSchema, authType) => async (req, res, next) => {
   const cookies = Object.keys(req.signedCookies).length > 0 ? req.signedCookies : null;
 
   //  if no cookies available
   if (!cookies) {
-    return next('No cookies, Authorization failed!');
+    const error = makeError('No cookies, Authorization failed!', 403);
+    return next(error);
   }
 
   //  if auth cookie not available
   if (!cookies[process.env.COOKIE_NAME]) {
-    return next('Auth cookie unavailable, Authorization failed!');
+    const error = makeError('Auth cookie unavailable, Authorization failed!', 403);
+    return next(error);
   }
 
   try {
@@ -26,16 +29,18 @@ const userAuth = async (req, _res, next) => {
     });
 
     //  if cookie token invalid
-    if (!user?.id) {
-      return next('Not a valid cookie, authorization failed!');
+
+    if (!authSchema[authType]?.includes(user?.role)) {
+      const error = makeError('Not a valid cookie, authorization failed!', 403);
+      return next(error);
     }
 
     //  if everything ok
     req.user = user;
     return next();
   } catch (err) {
-    next(err.message);
+    next(err);
   }
 };
 
-module.exports = userAuth;
+module.exports = checkAuth;

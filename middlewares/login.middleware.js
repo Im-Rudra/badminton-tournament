@@ -6,9 +6,13 @@ const makeUserObj = require('../utilities/makeUserObj');
 exports.checkLoggedIn = async (req, res, next) => {
   const cookies = Object.keys(req.signedCookies).length > 0 ? req.signedCookies : null;
 
+  // if no cookies available
   if (!cookies) {
-    return next();
+    const error = new Error('No cookies');
+    error.status = 401;
+    return next(error);
   }
+
   try {
     const token = cookies[process.env.COOKIE_NAME];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -16,7 +20,8 @@ exports.checkLoggedIn = async (req, res, next) => {
     const userObj = makeUserObj(user);
     console.log(userObj);
     res.json(userObj);
+    res.end();
   } catch (err) {
-    next();
+    next(err);
   }
 };
