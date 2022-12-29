@@ -3,11 +3,12 @@ Joi = Joi.extend(require('joi-phone-number'));
 
 const schemas = {
   registerSchema: Joi.object({
-    name: Joi.string().required().min(3),
+    firstName: Joi.string().required().min(2),
+    lastName: Joi.string().required().min(2),
     email: Joi.string().required().email(),
     phone: Joi.string().required().phoneNumber({ format: 'e164' }),
-    password: Joi.string().required().min(6),
-    role: Joi.string().required().valid('Administrator', 'Moderator', 'User')
+    password: Joi.string().required().min(6)
+    // role: Joi.string().required().valid('Administrator', 'Moderator', 'User')
   }),
   loginSchema: Joi.object({
     email: Joi.string().email(),
