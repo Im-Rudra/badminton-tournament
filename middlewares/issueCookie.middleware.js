@@ -6,6 +6,7 @@ const issueCookie = (req, res, next) => {
     return;
   }
   const { _id: id, email, phone } = req.user;
+
   const jwtObj = { id, email, phone };
   const jwtToken = jwt.sign(jwtObj, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRY
@@ -17,8 +18,8 @@ const issueCookie = (req, res, next) => {
     httpOnly: true,
     signed: true
   });
-  const respObj = makeUserObj(req.user);
-  res.status(201).json(respObj);
+
+  res.status(201).json(makeUserObj(req.user));
 };
 
 module.exports = issueCookie;

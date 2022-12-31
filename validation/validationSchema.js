@@ -12,9 +12,10 @@ const schemas = {
   }),
   loginSchema: Joi.object({
     email: Joi.string().email(),
-    phone: Joi.string().phoneNumber({ format: 'international' }),
-    password: Joi.string().required().min(6)
-  }).or('email', 'phone'),
+    // phone: Joi.string().phoneNumber({ format: 'international' }),
+    password: Joi.string().required().min(6),
+    remember: Joi.boolean().required().default(true)
+  }),
   requestSchema: Joi.object({
     fromID: Joi.string().hex().length(24),
     toID: Joi.string().hex().length(24)

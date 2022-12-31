@@ -63,26 +63,13 @@ exports.loginController = async (req, res, next) => {
       return next(error);
     }
 
-    // const { _id: id, name } = user;
-
-    // //  jwt public object
-    // const jwtObj = { id, name, email: user?.email, phone: user?.phone };
-    // const jwtToken = jwt.sign(jwtObj, process.env.JWT_SECRET, {
-    //   expiresIn: process.env.JWT_EXPIRY
-    // });
-
-    // //  setting as signed cookie to the browser
-    // res.cookie(process.env.COOKIE_NAME, jwtToken, {
-    //   maxAge: process.env.COOKIE_EXPIRY,
-    //   httpOnly: true,
-    //   signed: true
-    // });
-
     req.user = user;
+    //  if remember = false then not issuing the cookie
+    if (!req?.body?.remember) {
+      return res.json(makeUserObj(user));
+    }
 
-    //  if everything is okey
-    const resObj = makeUserObj(user);
-    res.json(resObj);
+    // directing to the issueCookie function
     next();
   } catch (error) {
     console.log(error.message);
