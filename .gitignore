@@ -7,6 +7,10 @@
 /.pnp
 .pnp.js
 
+.env
+
+access.log
+
 # testing
 /coverage
 

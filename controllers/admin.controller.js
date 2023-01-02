@@ -11,7 +11,7 @@ exports.getUsersController = async (req, res, next) => {
     const limit = pagination?.pageSize ? pagination.pageSize : 10;
     const skip = pagination?.current ? (pagination?.current - 1) * limit : 0;
     //  getting users
-    const users = await User.find(filterDoc).skip(skip).limit(limit);
+    const users = await User.find(filterDoc).skip(skip).limit(limit).sort(null);
     const totalUsers = await User.count();
     const data = users.map((user) => makeUserObj(user));
     res.json({ totalUsers, users: data });

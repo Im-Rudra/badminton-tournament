@@ -8,10 +8,10 @@ const tournamentSchema = new Schema(
       type: String,
       trim: true,
       min: [3, 'Name must be at least 3 charecters long'],
-      required: [true, 'Name is required!'],
+      required: [true, 'tournament name is required!'],
       unique: true
     },
-    creatorID: {
+    creator: {
       type: SchemaTypes.ObjectId,
       ref: 'users',
       required: true
@@ -27,8 +27,9 @@ const tournamentSchema = new Schema(
       required: true
     },
     endTime: Date,
-    tournamentYear: {
-      type: Date,
+    year: {
+      type: Number,
+      default: Date.now,
       set: setter,
       required: true
     }
