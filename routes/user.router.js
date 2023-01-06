@@ -8,7 +8,9 @@ const {
   registrationController,
   loginController,
   logoutController,
-  getLoggedInUser
+  getLoggedInUser,
+  getTournament,
+  teamRegistration
 } = require('../controllers/user.controller');
 const { getUsersController } = require('../controllers/admin.controller');
 const checkAuth = require('../authentication/auth');
@@ -23,9 +25,6 @@ router.get('/', (req, res) => {
 
 router.post('/getLoggedinUser', getLoggedInUser);
 
-//  protected route | admin and moderators can access this route
-router.post('/getUsers', checkAuth(authSchema, 'Administrator'), getUsersController);
-
 router.post('/login', inputValidator(inputSchema.loginSchema), loginController, issueCookie);
 
 router.post(
@@ -34,6 +33,10 @@ router.post(
   registrationController,
   issueCookie
 );
+
+router.post('/teamRegistration', checkAuth(authSchema, 'User'), teamRegistration);
+
+router.post('/getTournament', checkAuth(authSchema, 'User'), getTournament);
 
 router.post('/logout', logoutController);
 

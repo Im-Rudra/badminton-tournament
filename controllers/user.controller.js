@@ -7,6 +7,8 @@ const makeUserObj = require('../utilities/makeUserObj');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const makeError = require('../utilities/error');
+const Tournament = require('../models/tournament.model');
+const Team = require('../models/team.model');
 
 require('dotenv').config();
 
@@ -107,5 +109,69 @@ exports.getLoggedInUser = async (req, res, next) => {
     res.end();
   } catch {
     res.json(null).end();
+  }
+};
+
+exports.getTournament = async (req, res, next) => {
+  // console.log('helo');
+  // return;
+  try {
+    const dbRes = await Tournament.findOne({ status: 'Open' })
+      .sort({ createdAt: -1 })
+      .limit(1)
+      .populate({ path: 'creator', select: 'firstName lastName' });
+    if (!dbRes._id) {
+      return res.json({ success: false, message: 'No Tournament Found!' });
+    }
+    res.json(dbRes);
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};
+
+exports.teamRegistration = async (req, res, next) => {
+  try {
+    let { teamName, secondPlayer, tournament, teamType } = req.body;
+    let dbDoc = {
+      teamName,
+      tournament,
+      teamType
+    };
+
+    const tournamentData = await Tournament.findById(tournament);
+    if (!tournamentData._id) {
+      return res.json({ success: false, message: 'Tournament not found!' });
+    } else if (tournamentData.status === 'Closed') {
+      return res.json({ success: false, message: 'Tournament closed!' });
+    }
+
+    if (secondPlayer) {
+      secondPlayer = await User.findOne({ email: req.body.secondPlayer });
+      if (!secondPlayer._id) {
+        return res.json({
+          success: false,
+          message: 'Second player email not found!',
+          instruction: 'create-new-user'
+        });
+      }
+      dbDoc.secondPlayer = secondPlayer._id;
+    }
+    dbDoc.firstPlayer = req.user._id;
+    const newTeam = new Team(dbDoc);
+    const dbRes = await newTeam.save();
+
+    const incDoc = { totalTeams: 1 };
+    if (dbRes.teamType === 'Single') {
+      incDoc.singleTeams = 1;
+    } else if (dbRes.teamType === 'Double') {
+      incDoc.doubleTeams = 1;
+    }
+
+    await Tournament.findByIdAndUpdate(dbRes.tournament, { $inc: incDoc });
+    res.json(dbRes);
+  } catch (err) {
+    console.log(err);
+    next(err);
   }
 };

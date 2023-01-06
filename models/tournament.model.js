@@ -8,12 +8,12 @@ const tournamentSchema = new Schema(
       type: String,
       trim: true,
       min: [3, 'Name must be at least 3 charecters long'],
-      required: [true, 'tournament name is required!'],
-      unique: true
+      required: [true, 'tournament name is required!']
+      // unique: true
     },
     creator: {
       type: SchemaTypes.ObjectId,
-      ref: 'users',
+      ref: 'User',
       required: true
     },
     status: {
@@ -26,11 +26,30 @@ const tournamentSchema = new Schema(
       default: Date.now,
       required: true
     },
-    endTime: Date,
-    year: {
-      type: Number,
-      default: Date.now,
+    endTime: {
+      type: Date,
+      default: () => Date.now() + 604800000, // +7 days
+      required: true
+    },
+    tournamentYear: {
+      type: String,
+      default: () => new Date().getFullYear(),
       set: setter,
+      required: true
+    },
+    totalTeams: {
+      type: Number,
+      default: 0,
+      required: true
+    },
+    singleTeams: {
+      type: Number,
+      default: 0,
+      required: true
+    },
+    doubleTeams: {
+      type: Number,
+      default: 0,
       required: true
     }
   },

@@ -19,6 +19,12 @@ const schemas = {
   requestSchema: Joi.object({
     fromID: Joi.string().hex().length(24),
     toID: Joi.string().hex().length(24)
+  }),
+  createTournament: Joi.object({
+    tournamentName: Joi.string().required(),
+    startTime: Joi.date().required(),
+    endTime: Joi.date().required(),
+    tournamentYear: Joi.string()
   })
 };
 
