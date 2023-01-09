@@ -33,7 +33,7 @@ app.use(
     //   'Authorization'
     // ],
     'access-control-allow-credentials': true,
-    sameSite: 'None',
+    SameSite: 'None',
     credentials: true
   })
 );
