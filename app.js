@@ -19,7 +19,7 @@ require('dotenv').config();
 
 app.use(
   cors({
-    origin: true, // use your actual domain name (or localhost), using * is not recommended
+    origin: 'https://iant-badminton.netlify.app/', // use your actual domain name (or localhost), using * is not recommended
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
     allowedHeaders: [
       'Content-Type',

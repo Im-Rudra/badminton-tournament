@@ -28,13 +28,15 @@ exports.registrationController = async (req, res, next) => {
 
     // const error = makeError('Email or phone Already Exists', 403);
     if (user.length) {
-      return res.json(new resError('Email or phone Already Exists'));
+      return res.json(new resError('Email or phone Already Exists', 'repeated-credentials'));
     }
 
     bcrypt.hash(password, saltRounds, async (err, hash) => {
       if (err) {
         // const respMsg = new ResponseMsg(true, 'An unknown error occured on the server!');
-        return res.status(500).json(resError('An unknown error occured on the server!'));
+        return res
+          .status(500)
+          .json(new resError('Something went wrong on the server!', 'server-error'));
       }
       const newUser = new User({ ...rest, email, phone, hash });
       const dbRes = await newUser.save();
