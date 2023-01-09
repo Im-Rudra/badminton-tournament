@@ -11,7 +11,7 @@ const teamSchema = new Schema(
     },
     tournament: {
       type: SchemaTypes.ObjectId,
-      ref: 'User',
+      ref: 'Tournament',
       required: true
     },
     teamType: {

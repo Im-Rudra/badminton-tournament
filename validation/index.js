@@ -9,7 +9,12 @@ const validateData = (schema) => (req, res, next) => {
   });
   if (error) {
     const errors = error.details.map((err) => err.message);
-    return res.json({ error: true, message: 'invalid input', errors });
+    return res.json({
+      error: true,
+      errorType: 'data-validation',
+      message: 'invalid input',
+      errors
+    });
   }
   next();
 };

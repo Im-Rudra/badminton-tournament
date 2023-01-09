@@ -6,7 +6,8 @@ const schemas = {
     firstName: Joi.string().required().min(2),
     lastName: Joi.string().required().min(2),
     email: Joi.string().required().email(),
-    phone: Joi.string().required().phoneNumber({ format: 'e164' }),
+    phone: Joi.string().required(),
+    // phone: Joi.string().required().phoneNumber({ format: 'e164' }),
     password: Joi.string().required().min(6)
     // role: Joi.string().required().valid('Administrator', 'Moderator', 'User')
   }),
@@ -25,6 +26,12 @@ const schemas = {
     startTime: Joi.date().required(),
     endTime: Joi.date().required(),
     tournamentYear: Joi.string()
+  }),
+  teamRegistration: Joi.object({
+    tournament: Joi.string().hex().length(24).required(),
+    teamName: Joi.string().required(),
+    teamType: Joi.string().required().valid('Single', 'Double'),
+    secondPlayer: Joi.string().email()
   })
 };
 

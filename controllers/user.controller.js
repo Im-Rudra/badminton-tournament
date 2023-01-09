@@ -2,13 +2,15 @@
 const User = require('../models/user.model');
 const ResponseMsg = require('../libs/responseMsg');
 const makeUserObj = require('../utilities/makeUserObj');
+const makeError = require('../utilities/error');
+const Tournament = require('../models/tournament.model');
+const Team = require('../models/team.model');
+const resError = require('../utilities/resError');
 
 //  external imports
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const makeError = require('../utilities/error');
-const Tournament = require('../models/tournament.model');
-const Team = require('../models/team.model');
+const _ = require('lodash');
 
 require('dotenv').config();
 
@@ -16,7 +18,7 @@ const saltRounds = 10;
 
 exports.registrationController = async (req, res, next) => {
   try {
-    const { password, email, phone, ...rest } = req.body;
+    const { password, email, phone, remember, ...rest } = req.body;
     // if the user already exists
     const user = await User.find({ $or: [{ email }, { phone }] });
     // const respMsg = new ResponseMsg(
@@ -24,19 +26,25 @@ exports.registrationController = async (req, res, next) => {
     //   'Email or phone Already Exists, Use another Email And Phone'
     // );
 
-    const error = makeError('Email or phone Already Exists', 403);
+    // const error = makeError('Email or phone Already Exists', 403);
     if (user.length) {
-      return next(error);
+      return res.json(new resError('Email or phone Already Exists'));
     }
 
     bcrypt.hash(password, saltRounds, async (err, hash) => {
       if (err) {
-        const respMsg = new ResponseMsg(true, 'An unknown error occured on the server!');
-        return res.status(500).json(respMsg);
+        // const respMsg = new ResponseMsg(true, 'An unknown error occured on the server!');
+        return res.status(500).json(resError('An unknown error occured on the server!'));
       }
-      const newUser = new User({ ...rest, email, phone, hash, role: 'User' });
+      const newUser = new User({ ...rest, email, phone, hash });
       const dbRes = await newUser.save();
       req.user = dbRes;
+
+      if (!req?.body?.remember) {
+        return res.json(makeUserObj(dbRes));
+      }
+
+      // forwarding to issueCookie function
       next();
     });
   } catch (err) {
@@ -51,9 +59,7 @@ exports.loginController = async (req, res, next) => {
     const user = await User.findOne({ $or: [{ email }, { phone }] });
 
     if (!user) {
-      const error = new Error('User not found');
-      error.status = 404;
-      return next(error);
+      return res.json(resError('User not found!'));
     }
 
     //  password matching
@@ -61,8 +67,7 @@ exports.loginController = async (req, res, next) => {
 
     //  if password is wrong
     if (!hashMatch) {
-      const error = makeError('Wrong password!', 403);
-      return next(error);
+      return res.json(resError('Wrong password!'));
     }
 
     req.user = user;
@@ -71,7 +76,7 @@ exports.loginController = async (req, res, next) => {
       return res.json(makeUserObj(user));
     }
 
-    // directing to the issueCookie function
+    // forwording to the issueCookie function
     next();
   } catch (error) {
     console.log(error.message);
@@ -82,7 +87,7 @@ exports.loginController = async (req, res, next) => {
 exports.logoutController = async (req, res) => {
   try {
     res.clearCookie(process.env.COOKIE_NAME);
-    res.json({ message: 'logout successful' });
+    res.json({ success: true, message: 'logout successful' });
   } catch (err) {
     console.log(err.message);
   }
@@ -120,8 +125,8 @@ exports.getTournament = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .limit(1)
       .populate({ path: 'creator', select: 'firstName lastName' });
-    if (!dbRes._id) {
-      return res.json({ success: false, message: 'No Tournament Found!' });
+    if (!dbRes?._id) {
+      return res.json(new resError('No Tournament Found!'));
     }
     res.json(dbRes);
   } catch (err) {
@@ -141,19 +146,15 @@ exports.teamRegistration = async (req, res, next) => {
 
     const tournamentData = await Tournament.findById(tournament);
     if (!tournamentData._id) {
-      return res.json({ success: false, message: 'Tournament not found!' });
+      return res.json(new resError('Tournament not found!'));
     } else if (tournamentData.status === 'Closed') {
-      return res.json({ success: false, message: 'Tournament closed!' });
+      return res.json(new resError('Tournament closed!'));
     }
 
     if (secondPlayer) {
       secondPlayer = await User.findOne({ email: req.body.secondPlayer });
-      if (!secondPlayer._id) {
-        return res.json({
-          success: false,
-          message: 'Second player email not found!',
-          instruction: 'create-new-user'
-        });
+      if (!secondPlayer?._id) {
+        return res.json(new resError('Second player email not found!', 'create-new-user'));
       }
       dbDoc.secondPlayer = secondPlayer._id;
     }
@@ -161,17 +162,86 @@ exports.teamRegistration = async (req, res, next) => {
     const newTeam = new Team(dbDoc);
     const dbRes = await newTeam.save();
 
-    const incDoc = { totalTeams: 1 };
+    const incrementDoc = { totalTeams: 1 };
     if (dbRes.teamType === 'Single') {
-      incDoc.singleTeams = 1;
+      incrementDoc.singleTeams = 1;
     } else if (dbRes.teamType === 'Double') {
-      incDoc.doubleTeams = 1;
+      incrementDoc.doubleTeams = 1;
     }
 
-    await Tournament.findByIdAndUpdate(dbRes.tournament, { $inc: incDoc });
+    await Tournament.findByIdAndUpdate(dbRes.tournament, { $inc: incrementDoc });
+
     res.json(dbRes);
   } catch (err) {
     console.log(err);
+    next(err);
+  }
+};
+
+exports.checkTeamRegistrablity = async (req, res, next) => {
+  try {
+    // console.log(req.body);
+    const { tournament: tournamentID } = req.body;
+
+    const tournament = await Tournament.findById(tournamentID);
+    // console.log(tournament);
+
+    if (!tournament?._id) {
+      return res
+        .json(
+          new resError("Tournament doesn't exist!", 'tournament-not-found', '/team-registration')
+        )
+        .status(404);
+    } else if (tournament?.status === 'Closed') {
+      return res
+        .json(new resError('Tournament closed already', 'tournament-closed', '/team-registration'))
+        .status(404);
+    }
+
+    const checkDoc = {
+      $and: [
+        { tournament: tournament },
+        { $or: [{ firstPlayer: req.user._id }, { secondPlayer: req.user._id }] }
+      ]
+    };
+    const checkData = await Team.find(checkDoc).sort({ createdAt: -1 });
+
+    let verdictObj = _.countBy(checkData, (team) =>
+      team.teamType === 'Single' ? 'Single' : 'Double'
+    );
+    // console.log(verdictObj);
+
+    if (verdictObj.Single && verdictObj.Double) {
+      return res.json(
+        new resError('Team not registrable', 'team-not-registrable', '/team-registration')
+      );
+    }
+
+    if (req.body.teamType) {
+      const { teamType } = req.body;
+      if (verdictObj[teamType]) {
+        return res.json(
+          new resError(`Not eligible for ${teamType} team`, 'not-eligible', '/team-registration')
+        );
+      }
+    }
+
+    if (Object.keys(verdictObj).length === 0) {
+      verdictObj = null;
+    }
+
+    req.tournament = tournamentID;
+    req.teamRegistrablityObj = verdictObj;
+
+    if (!req.body.teamType) {
+      return res.json(verdictObj);
+    }
+
+    if (req.body.teamType) {
+      next();
+    }
+  } catch (err) {
+    console.log(err.message);
     next(err);
   }
 };

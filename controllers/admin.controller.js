@@ -1,6 +1,7 @@
 const Tournament = require('../models/tournament.model');
 const User = require('../models/user.model');
 const makeUserObj = require('../utilities/makeUserObj');
+const resError = require('../utilities/resError');
 
 exports.getUsersController = async (req, res, next) => {
   try {
@@ -42,6 +43,35 @@ exports.getAllTournaments = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .populate({ path: 'creator', select: 'firstName lastName' });
     res.json(dbRes);
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};
+
+exports.adminForceRegistration = async (req, res, next) => {
+  try {
+    const { password, email, phone, remember, ...rest } = req.body;
+    // if the user already exists
+    const user = await User.find({ $or: [{ email }, { phone }] });
+    if (user?._id) {
+      return res.json(new resError('Email or phone Already Exists'));
+    }
+
+    bcrypt.hash(password, saltRounds, async (err, hash) => {
+      if (err) {
+        return res.status(500).json(new resError('An unknown error occured on the server!'));
+      }
+      const newUser = new User({ ...rest, email, phone, hash });
+      const dbRes = await newUser.save();
+      req.user = dbRes;
+
+      if (!req?.body?.remember) {
+        return res.json(makeUserObj(dbRes));
+      }
+      // forwarding to issueCookie function
+      // next();
+    });
   } catch (err) {
     console.log(err);
     next(err);

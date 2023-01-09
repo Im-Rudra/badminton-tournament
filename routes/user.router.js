@@ -1,5 +1,6 @@
 //  external requires
 const express = require('express');
+const _ = require('lodash');
 
 //  internal imports
 const inputValidator = require('../validation');
@@ -10,12 +11,16 @@ const {
   logoutController,
   getLoggedInUser,
   getTournament,
-  teamRegistration
+  teamRegistration,
+  checkTeamRegistrablity
 } = require('../controllers/user.controller');
 const { getUsersController } = require('../controllers/admin.controller');
 const checkAuth = require('../authentication/auth');
 const authSchema = require('../authentication/auth.schema');
 const issueCookie = require('../middlewares/issueCookie.middleware');
+const Team = require('../models/team.model');
+const Tournament = require('../models/tournament.model');
+const resError = require('../utilities/resError');
 
 const router = express.Router();
 
@@ -34,7 +39,15 @@ router.post(
   issueCookie
 );
 
-router.post('/teamRegistration', checkAuth(authSchema, 'User'), teamRegistration);
+router.post('/checkTeamRegistrablity', checkAuth(authSchema, 'User'), checkTeamRegistrablity);
+
+router.post(
+  '/teamRegistration',
+  checkAuth(authSchema, 'User'),
+  inputValidator(inputSchema.teamRegistration),
+  checkTeamRegistrablity,
+  teamRegistration
+);
 
 router.post('/getTournament', checkAuth(authSchema, 'User'), getTournament);
 

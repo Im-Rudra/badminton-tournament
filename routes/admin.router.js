@@ -21,4 +21,11 @@ router.post(
 
 router.post('/getAllTournaments', checkAuth(authSchema, 'Administrator'), getAllTournaments);
 
+// router.post(
+//   '/adminForceRegistration',
+//   checkAuth(authSchema, 'Administrator'),
+//   inputValidator(inputSchema.registerSchema),
+//   adminForceRegistration
+// );
+
 module.exports = router;
