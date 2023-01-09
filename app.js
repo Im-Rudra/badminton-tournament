@@ -32,6 +32,7 @@ app.use(
     //   'x-client-secret',
     //   'Authorization'
     // ],
+    'access-control-allow-credentials': true,
     credentials: true
   })
 );
