@@ -8,7 +8,8 @@ const schemas = {
     email: Joi.string().required().email(),
     phone: Joi.string().required(),
     // phone: Joi.string().required().phoneNumber({ format: 'e164' }),
-    password: Joi.string().required().min(6)
+    password: Joi.string().required().min(6),
+    remember: Joi.boolean()
     // role: Joi.string().required().valid('Administrator', 'Moderator', 'User')
   }),
   loginSchema: Joi.object({
