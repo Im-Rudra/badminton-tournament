@@ -17,7 +17,9 @@ const issueCookie = (req, res, next) => {
     res.cookie(process.env.COOKIE_NAME, jwtToken, {
       maxAge: process.env.COOKIE_EXPIRY,
       httpOnly: true,
-      signed: true
+      signed: true,
+      sameSite: 'none',
+      secure: true
     });
 
     res.status(201).json(makeUserObj(req.user));
