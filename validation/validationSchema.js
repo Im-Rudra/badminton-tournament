@@ -32,7 +32,8 @@ const schemas = {
     tournament: Joi.string().hex().length(24).required(),
     teamName: Joi.string().required(),
     teamType: Joi.string().required().valid('Single', 'Double'),
-    secondPlayer: Joi.string().email()
+    fullName_2: Joi.string(),
+    phone_2: Joi.string()
   })
 };
 

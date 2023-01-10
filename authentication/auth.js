@@ -21,7 +21,7 @@ const checkAuth = (authType) => async (req, res, next) => {
       return res.status(403).json(new resError('Not logged in!'));
     }
 
-    const token = authorization;
+    const token = JSON.parse(authorization);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // console.log(authorization);
 
@@ -34,7 +34,7 @@ const checkAuth = (authType) => async (req, res, next) => {
       // const error = makeError('Not authorized for this request', 403);
       return res.status(403).json(new resError('Not authorized for this request'.i));
     }
-    console.log(authorization);
+    // console.log(authorization);
 
     //  if everything ok
     req.user = user;

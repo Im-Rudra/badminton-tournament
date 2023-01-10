@@ -98,13 +98,15 @@ exports.logoutController = async (req, res) => {
 exports.getLoggedInUser = async (req, res, next) => {
   try {
     const { authorization } = req.headers;
+    // console.log(authorization);
 
     //  if no cookies available
     if (!authorization) {
       return res.status(403).json(new resError('Not logged in!'));
     }
 
-    const token = authorization;
+    const token = JSON.parse(authorization);
+    // console.log(token);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await User.findOne({
@@ -141,26 +143,22 @@ exports.teamRegistration = async (req, res, next) => {
   try {
     let { teamName, secondPlayer, tournament, teamType } = req.body;
     let dbDoc = {
-      teamName,
-      tournament,
-      teamType
+      ...req.body,
+      teamLeader: req.user._id,
+      fullName_1: `${req.user.firstName} ${req.user.lastName}`,
+      phone_1: req.user.phone
     };
 
-    const tournamentData = await Tournament.findById(tournament);
-    if (!tournamentData._id) {
-      return res.json(new resError('Tournament not found!'));
-    } else if (tournamentData.status === 'Closed') {
-      return res.json(new resError('Tournament closed!'));
-    }
+    // { teamName: "sf", teamType: "Double", fullName_2: "sdf", phone_2: "1223456", tournament: "63bc8d6349a107cf2b953288" }
 
-    if (secondPlayer) {
-      secondPlayer = await User.findOne({ email: req.body.secondPlayer });
-      if (!secondPlayer?._id) {
-        return res.json(new resError('Second player email not found!', 'create-new-user'));
-      }
-      dbDoc.secondPlayer = secondPlayer._id;
-    }
-    dbDoc.firstPlayer = req.user._id;
+    // if (phone_2) {
+    //   secondPlayer = await User.findOne({ email: req.body.secondPlayer });
+    //   if (!secondPlayer?._id) {
+    //     return res.json(new resError('Second player email not found!', 'create-new-user'));
+    //   }
+    //   dbDoc.secondPlayer = secondPlayer._id;
+    // }
+    // dbDoc.firstPlayer = req.user._id;
     const newTeam = new Team(dbDoc);
     const dbRes = await newTeam.save();
 
@@ -171,7 +169,7 @@ exports.teamRegistration = async (req, res, next) => {
       incrementDoc.doubleTeams = 1;
     }
 
-    await Tournament.findByIdAndUpdate(dbRes.tournament, { $inc: incrementDoc });
+    await Tournament.findByIdAndUpdate(tournament, { $inc: incrementDoc });
 
     res.json(dbRes);
   } catch (err) {
@@ -203,7 +201,8 @@ exports.checkTeamRegistrablity = async (req, res, next) => {
     const checkDoc = {
       $and: [
         { tournament: tournament },
-        { $or: [{ firstPlayer: req.user._id }, { secondPlayer: req.user._id }] }
+        { teamLeader: req.user._id }
+        // { $or: [{ phone_1: req.user._id }, { phone_2: req.user._id }] }
       ]
     };
     const checkData = await Team.find(checkDoc).sort({ createdAt: -1 });

@@ -19,38 +19,27 @@ const teamSchema = new Schema(
       enum: ['Single', 'Double'],
       required: true
     },
-    // players: {
-    //   type: [
-    //     {
-    //       type: SchemaTypes.ObjectId,
-    //       ref: 'user',
-    //       required: true
-    //     }
-    //   ],
-    //   max: 2,
-    //   min: 1,
-    //   required: true
-    // },
-    firstPlayer: {
+    teamLeader: {
       type: SchemaTypes.ObjectId,
       ref: 'User',
       required: true
     },
-    secondPlayer: {
-      type: SchemaTypes.ObjectId,
-      ref: 'User'
+    fullName_1: {
+      type: String,
+      required: true
     },
+    phone_1: {
+      type: String,
+      required: true
+    },
+    fullName_2: String,
+    phone_2: String,
     paymentStatus: {
       type: String,
       enum: ['Verified', 'Unverified'],
       default: 'Unverified',
       required: true
     }
-    // tournamentYear: {
-    //   type: Date,
-    //   set: setter,
-    //   required: true
-    // }
   },
   { timestamps: true }
 );
