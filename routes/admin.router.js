@@ -10,16 +10,16 @@ const inputSchema = require('../validation/validationSchema');
 const router = require('express').Router();
 
 //  protected route | admin can access this route
-router.post('/getUsers', checkAuth(authSchema, 'Administrator'), getUsersController);
+router.post('/getUsers', checkAuth('Administrator'), getUsersController);
 
 router.post(
   '/createTournament',
   inputValidator(inputSchema.createTournament),
-  checkAuth(authSchema, 'Administrator'),
+  checkAuth('Administrator'),
   createTournament
 );
 
-router.post('/getAllTournaments', checkAuth(authSchema, 'Administrator'), getAllTournaments);
+router.post('/getAllTournaments', checkAuth('Administrator'), getAllTournaments);
 
 // router.post(
 //   '/adminForceRegistration',

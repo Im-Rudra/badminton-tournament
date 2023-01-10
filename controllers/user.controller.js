@@ -61,7 +61,7 @@ exports.loginController = async (req, res, next) => {
     const user = await User.findOne({ $or: [{ email }, { phone }] });
 
     if (!user) {
-      return res.json(resError('User not found!'));
+      return res.json(new resError('User not found!'));
     }
 
     //  password matching
@@ -69,7 +69,7 @@ exports.loginController = async (req, res, next) => {
 
     //  if password is wrong
     if (!hashMatch) {
-      return res.json(resError('Wrong password!'));
+      return res.json(new resError('Wrong password!'));
     }
 
     req.user = user;
@@ -96,15 +96,15 @@ exports.logoutController = async (req, res) => {
 };
 
 exports.getLoggedInUser = async (req, res, next) => {
-  const cookies = Object.keys(req.signedCookies).length > 0 ? req.signedCookies : null;
-
-  // if no cookies available
-  if (!cookies) {
-    return res.json(null).end();
-  }
-
   try {
-    const token = cookies[process.env.COOKIE_NAME];
+    const { authorization } = req.headers;
+
+    //  if no cookies available
+    if (!authorization) {
+      return res.status(403).json(new resError('Not logged in!'));
+    }
+
+    const token = authorization;
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await User.findOne({
@@ -113,9 +113,9 @@ exports.getLoggedInUser = async (req, res, next) => {
 
     const userObj = makeUserObj(user);
     res.json(userObj);
-    res.end();
-  } catch {
-    res.json(null).end();
+  } catch (err) {
+    console.log(err.message);
+    next(err);
   }
 };
 
