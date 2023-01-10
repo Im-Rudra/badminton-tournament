@@ -14,6 +14,7 @@ const checkAuth = (authType) => async (req, res, next) => {
 
   try {
     const { authorization } = req.headers;
+    // console.log(authorization);
 
     //  if no cookies available
     if (!authorization) {
@@ -22,6 +23,7 @@ const checkAuth = (authType) => async (req, res, next) => {
 
     const token = authorization;
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // console.log(authorization);
 
     const user = await User.findOne({
       $and: [{ _id: decoded.id }, { email: decoded.email }, { phone: decoded.phone }]
@@ -30,13 +32,15 @@ const checkAuth = (authType) => async (req, res, next) => {
     //  if cookie token invalid
     if (!authSchema[authType]?.includes(user?.role)) {
       // const error = makeError('Not authorized for this request', 403);
-      return res.status(403).json(new resError('Not authorized for this request'));
+      return res.status(403).json(new resError('Not authorized for this request'.i));
     }
+    console.log(authorization);
 
     //  if everything ok
     req.user = user;
     next();
   } catch (err) {
+    console.log(err);
     next(err);
   }
 };
