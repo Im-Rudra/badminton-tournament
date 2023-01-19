@@ -3,8 +3,12 @@ const authSchema = require('../authentication/auth.schema');
 const {
   getUsersController,
   createTournament,
-  getAllTournaments
+  getAllTournaments,
+  verifyTeamController,
+  teamsController
 } = require('../controllers/admin.controller');
+const Team = require('../models/team.model');
+const resError = require('../utilities/resError');
 const inputValidator = require('../validation');
 const inputSchema = require('../validation/validationSchema');
 const router = require('express').Router();
@@ -20,6 +24,10 @@ router.post(
 );
 
 router.post('/getAllTournaments', checkAuth('Administrator'), getAllTournaments);
+
+router.post('/teams', checkAuth('Administrator'), teamsController);
+
+router.post('/verifyTeam', checkAuth('Administrator'), verifyTeamController);
 
 // router.post(
 //   '/adminForceRegistration',

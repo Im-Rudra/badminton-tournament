@@ -14,13 +14,7 @@ const {
   teamRegistration,
   checkTeamRegistrablity
 } = require('../controllers/user.controller');
-const { getUsersController } = require('../controllers/admin.controller');
 const checkAuth = require('../authentication/auth');
-const authSchema = require('../authentication/auth.schema');
-const issueCookie = require('../middlewares/issueCookie.middleware');
-const Team = require('../models/team.model');
-const Tournament = require('../models/tournament.model');
-const resError = require('../utilities/resError');
 const issueToken = require('../middlewares/issueToken');
 
 const router = express.Router();
