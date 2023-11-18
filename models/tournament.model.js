@@ -31,6 +31,14 @@ const tournamentSchema = new Schema(
       default: () => Date.now() + 604800000, // +7 days
       required: true
     },
+    singlePlayerEntryFee: {
+      type: Number,
+      required: true
+    },
+    doublePlayerEntryFee: {
+      type: Number,
+      required: true
+    },
     tournamentYear: {
       type: String,
       default: () => new Date().getFullYear(),

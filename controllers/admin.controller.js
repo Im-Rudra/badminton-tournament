@@ -26,10 +26,8 @@ exports.getUsersController = async (req, res, next) => {
 exports.createTournament = async (req, res, next) => {
   try {
     const newTournament = new Tournament({ creator: req.user.id, status: 'Open', ...req.body });
-    // console.log(newTournament);
     const dbRes = await newTournament.save();
     res.json(dbRes);
-    // res.json(req.body);
   } catch (err) {
     console.log(err);
     next(err);

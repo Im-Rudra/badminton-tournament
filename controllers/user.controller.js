@@ -246,3 +246,59 @@ exports.checkTeamRegistrablity = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getMyRegistrations = async (req, res, next) => {
+  try {
+    const id = req.user._id;
+
+    const registrations = await Team.find({ teamLeader: id })
+      .sort({ createdAt: -1 })
+      .populate({ path: 'tournament' });
+    // console.log(registrations);
+    res.json(registrations);
+  } catch (err) {
+    console.log(err.message);
+    next(err);
+  }
+};
+
+exports.deleteTeamController = async (req, res, next) => {
+  try {
+    const { teamId } = req.body;
+    const team = await Team.findById(teamId);
+    if (!team._id) {
+      return res.json(new resError('team not found', 'team-not-found')).status(400);
+    }
+    // console.log(team.teamLeader.toString(), req.user._id.toString());
+    if (team.teamLeader.toString() !== req.user._id.toString()) {
+      return res.json(
+        new resError('not authorized to delete team', 'not-authorized-to-delete-team')
+      );
+    }
+    const tournament = await Tournament.findById(team.tournament);
+
+    const updateDoc = {
+      totalTeams: tournament.totalTeams - 1
+    };
+    if (team.teamType === 'Single') {
+      updateDoc.singleTeams = tournament.singleTeams - 1;
+    } else if (team.teamType === 'Double') {
+      updateDoc.doubleTeams = tournament.doubleTeams - 1;
+    }
+
+    // console.log(updateDoc);
+    // res.json(updateDoc);
+
+    // decreasse team count in the tounament
+    await Tournament.findByIdAndUpdate(team.tournament, updateDoc);
+
+    const deleteTeam = await Team.deleteOne({ _id: teamId });
+    // console.log('tour', modTournament);
+    // console.log('delete', deleteTeam);
+    return res.json(deleteTeam);
+    // next();
+  } catch (err) {
+    console.log(err.message);
+    next(err);
+  }
+};

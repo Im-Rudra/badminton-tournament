@@ -26,6 +26,8 @@ const schemas = {
     tournamentName: Joi.string().required(),
     startTime: Joi.date().required(),
     endTime: Joi.date().required(),
+    singlePlayerEntryFee: Joi.number().required(),
+    doublePlayerEntryFee: Joi.number().required(),
     tournamentYear: Joi.string()
   }),
   teamRegistration: Joi.object({
@@ -34,6 +36,9 @@ const schemas = {
     teamType: Joi.string().required().valid('Single', 'Double'),
     fullName_2: Joi.string(),
     phone_2: Joi.string()
+  }),
+  deleteTeam: Joi.object({
+    teamId: Joi.string().hex().length(24)
   })
 };
 

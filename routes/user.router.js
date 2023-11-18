@@ -12,7 +12,9 @@ const {
   getLoggedInUser,
   getTournament,
   teamRegistration,
-  checkTeamRegistrablity
+  checkTeamRegistrablity,
+  getMyRegistrations,
+  deleteTeamController
 } = require('../controllers/user.controller');
 const checkAuth = require('../authentication/auth');
 const issueToken = require('../middlewares/issueToken');
@@ -53,5 +55,14 @@ router.post(
 router.post('/getTournament', checkAuth('User'), getTournament);
 
 router.post('/logout', logoutController);
+
+router.get('/myRegistrations', checkAuth('User'), getMyRegistrations);
+
+router.post(
+  '/deleteTeam',
+  checkAuth('User'),
+  inputValidator(inputSchema.deleteTeam),
+  deleteTeamController
+);
 
 module.exports = router;
