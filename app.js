@@ -20,8 +20,17 @@ require('dotenv').config();
 
 app.use(
   cors({
-    origin: ['https://iant-badminton.netlify.app', 'http://localhost:3000'], // use your actual domain name (or localhost), using * is not recommended
+    // origin: ['https://iant-badminton.netlify.app', 'http://localhost:3000'], // use your actual domain name (or localhost), using * is not recommended
     // origin: '*',
+    origin: function (origin, callback) {
+      // Allow requests with no origin or from your specified origins
+      const allowedOrigins = ['https://iant-badminton.netlify.app', 'http://localhost:3000'];
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
     exposedHeaders: ['x-auth-token'],
     // 'Access-Control-Expose-Headers': 'x-auth-token',
@@ -40,6 +49,9 @@ app.use(
     credentials: true
   })
 );
+
+// Handle preflight requests
+app.options('*', cors());
 
 app.use(
   cookieSession({

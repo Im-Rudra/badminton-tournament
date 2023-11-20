@@ -307,8 +307,6 @@ exports.deleteTeamController = async (req, res, next) => {
 
 exports.checkoutSessionController = async (req, res, next) => {
   try {
-    // const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
     const teamId = req.body.teamId;
     if (!teamId) {
       return res.status(400).json(new resError('team id required', 'no-team-id'));
