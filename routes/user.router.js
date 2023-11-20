@@ -28,9 +28,10 @@ router.get('/', (req, res) => {
 });
 
 router.get('/test', (req, res) => {
-  console.log(req.headers);
-  res.header('x-auth-token', 'Hello world token');
-  res.send('ok');
+  // console.log(req.headers);
+  // res.header('x-auth-token', 'Hello world token');
+  // res.send('ok');
+  console.log(req.headers.origin);
 });
 
 router.post('/getLoggedinUser', getLoggedInUser);
