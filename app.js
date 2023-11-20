@@ -54,11 +54,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), {
-  flags: 'a'
-});
+// const accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/access.log'), {
+//   flags: 'a'
+// });
 
-app.use(morgan('combined', { stream: accessLogStream }));
+// app.use(morgan('combined', { stream: accessLogStream }));
 
 // app.set('trust proxy', 1); // trust first proxy
 // app.use(
