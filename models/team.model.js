@@ -39,6 +39,10 @@ const teamSchema = new Schema(
       enum: ['Verified', 'Unverified'],
       default: 'Unverified',
       required: true
+    },
+    paymentId: {
+      type: String,
+      default: null
     }
   },
   { timestamps: true }

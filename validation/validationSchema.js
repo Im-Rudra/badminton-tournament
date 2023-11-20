@@ -38,7 +38,14 @@ const schemas = {
     phone_2: Joi.string()
   }),
   deleteTeam: Joi.object({
-    teamId: Joi.string().hex().length(24)
+    teamId: Joi.string().hex().length(24).required()
+  }),
+  checkoutSession: Joi.object({
+    teamId: Joi.string().hex().length(24).required()
+  }),
+  verifyTeam: Joi.object({
+    teamId: Joi.string().hex().length(24).required(),
+    sessionId: Joi.string().required()
   })
 };
 

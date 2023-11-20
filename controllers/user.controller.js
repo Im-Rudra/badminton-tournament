@@ -14,6 +14,8 @@ const _ = require('lodash');
 
 require('dotenv').config();
 
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
 const saltRounds = 10;
 
 exports.registrationController = async (req, res, next) => {
@@ -300,5 +302,78 @@ exports.deleteTeamController = async (req, res, next) => {
   } catch (err) {
     console.log(err.message);
     next(err);
+  }
+};
+
+exports.checkoutSessionController = async (req, res, next) => {
+  try {
+    // const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+    const teamId = req.body.teamId;
+    if (!teamId) {
+      return res.status(400).json(new resError('team id required', 'no-team-id'));
+    }
+    const teamInfo = await Team.findById(teamId)
+      .populate({ path: 'teamLeader' })
+      .populate({ path: 'tournament' });
+    if (!teamInfo) {
+      return res.status(400).json(new resError('invalid team id provided', 'invalid-team-id'));
+    }
+    const tournamentInfo = teamInfo.tournament;
+    if (!tournamentInfo) {
+      return res.status(400).json(new resError('no tournament found', 'no-tournament'));
+    }
+
+    const customerInfo = teamInfo.teamLeader;
+
+    const productName = `${teamInfo.teamType} Player Entry Fee`;
+    // const productName = `${teamInfo.teamType} Player Team At ${tournamentInfo.tournamentName}`;
+
+    const price =
+      teamInfo.teamType === 'Single'
+        ? tournamentInfo.singlePlayerEntryFee
+        : tournamentInfo.doublePlayerEntryFee;
+
+    const lineItems = [
+      {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: productName
+          },
+          unit_amount: price * 100
+        },
+        quantity: 1
+      }
+    ];
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: lineItems,
+      mode: 'payment',
+      success_url: `${req.headers.origin}/success?sessionId={CHECKOUT_SESSION_ID}&teamId=${teamId}`,
+      cancel_url: `${req.headers.origin}/cancel`,
+      customer_email: customerInfo.email
+    });
+
+    res.json({ sessionId: session.id });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
+  }
+};
+
+exports.verifyTeamController = async (req, res, next) => {
+  try {
+    const { teamId, sessionId } = req.body;
+    if (!teamId && !sessionId) {
+      res.status(400).json(new resError('required ids missing', 'id-missing'));
+    }
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    res.json(session);
+  } catch (error) {
+    console.log(error.message);
+    next(error);
   }
 };

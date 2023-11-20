@@ -14,7 +14,9 @@ const {
   teamRegistration,
   checkTeamRegistrablity,
   getMyRegistrations,
-  deleteTeamController
+  deleteTeamController,
+  checkoutSessionController,
+  verifyTeamController
 } = require('../controllers/user.controller');
 const checkAuth = require('../authentication/auth');
 const issueToken = require('../middlewares/issueToken');
@@ -63,6 +65,20 @@ router.post(
   checkAuth('User'),
   inputValidator(inputSchema.deleteTeam),
   deleteTeamController
+);
+
+router.post(
+  '/create-checkout-session',
+  checkAuth('User'),
+  inputValidator(inputSchema.checkoutSession),
+  checkoutSessionController
+);
+
+router.post(
+  '/verifyTeam',
+  checkAuth('User'),
+  inputValidator(inputSchema.verifyTeam),
+  verifyTeamController
 );
 
 module.exports = router;

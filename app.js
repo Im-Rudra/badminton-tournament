@@ -21,6 +21,7 @@ require('dotenv').config();
 app.use(
   cors({
     origin: ['https://iant-badminton.netlify.app', 'http://localhost:3000'], // use your actual domain name (or localhost), using * is not recommended
+    // origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
     exposedHeaders: ['x-auth-token'],
     // 'Access-Control-Expose-Headers': 'x-auth-token',
