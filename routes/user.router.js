@@ -30,7 +30,7 @@ router.get('/', (req, res) => {
 router.get('/test', (req, res) => {
   // console.log(req.headers);
   // res.header('x-auth-token', 'Hello world token');
-  console.log(req.headers.origin);
+  console.log(req.headers.host);
   res.send('ok');
 });
 

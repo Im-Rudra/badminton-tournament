@@ -367,9 +367,24 @@ exports.verifyTeamController = async (req, res, next) => {
     if (!teamId && !sessionId) {
       res.status(400).json(new resError('required ids missing', 'id-missing'));
     }
+
+    const team = await Team.findById(teamId);
+    if (team.paymentStatus === 'Verified') {
+      return res.json({ success: true });
+    }
+
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    res.json(session);
+    if (session.payment_status !== 'paid') {
+      res.status(422).json(new resError("you didn't pay for the team", 'payment-incomplete'));
+    }
+
+    await Team.findByIdAndUpdate(teamId, {
+      paymentStatus: 'Verified',
+      paymentId: session.id
+    });
+
+    res.json({ success: true, message: 'team verification successful' });
   } catch (error) {
     console.log(error.message);
     next(error);
