@@ -18,39 +18,37 @@ const app = express();
 require('dotenv').config();
 // require('./config/passport');
 
-// app.use(
-//   cors({
-//     // origin: ['https://iant-badminton.netlify.app', 'http://localhost:3000'], // use your actual domain name (or localhost), using * is not recommended
-//     // origin: '*',
-//     origin: function (origin, callback) {
-//       // Allow requests with no origin or from your specified origins
-//       const allowedOrigins = ['https://iant-badminton.netlify.app', 'http://localhost:3000'];
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error('Not allowed by CORS'));
-//       }
-//     },
-//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
-//     exposedHeaders: ['x-auth-token'],
-//     // 'Access-Control-Expose-Headers': 'x-auth-token',
-//     allowedHeaders: [
-//       'Content-Type',
-//       'Origin',
-//       'X-Requested-With',
-//       'Accept',
-//       'x-client-key',
-//       'x-client-token',
-//       'x-client-secret',
-//       'Authorization'
-//     ],
-//     'access-control-allow-credentials': true,
-//     SameSite: 'None',
-//     credentials: true
-//   })
-// );
-
-app.use(cors());
+app.use(
+  cors({
+    // origin: ['https://iant-badminton.netlify.app', 'http://localhost:3000'], // use your actual domain name (or localhost), using * is not recommended
+    origin: '*',
+    // origin: function (origin, callback) {
+    //   // Allow requests with no origin or from your specified origins
+    //   const allowedOrigins = ['https://iant-badminton.netlify.app', 'http://localhost:3000'];
+    //   if (!origin || allowedOrigins.includes(origin)) {
+    //     callback(null, true);
+    //   } else {
+    //     callback(new Error('Not allowed by CORS'));
+    //   }
+    // },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
+    exposedHeaders: ['x-auth-token'],
+    // 'Access-Control-Expose-Headers': 'x-auth-token',
+    allowedHeaders: [
+      'Content-Type',
+      'Origin',
+      'X-Requested-With',
+      'Accept',
+      'x-client-key',
+      'x-client-token',
+      'x-client-secret',
+      'Authorization'
+    ],
+    'access-control-allow-credentials': true,
+    SameSite: 'None',
+    credentials: true
+  })
+);
 
 // Handle preflight requests
 app.options('*', cors());
