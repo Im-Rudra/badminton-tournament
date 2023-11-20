@@ -369,6 +369,9 @@ exports.verifyTeamController = async (req, res, next) => {
     }
 
     const team = await Team.findById(teamId);
+    if (!team?._id) {
+      return res.status(400).json(new resError('invalid ids', 'invalid-ids'));
+    }
     if (team.paymentStatus === 'Verified') {
       return res.json({ success: true });
     }
