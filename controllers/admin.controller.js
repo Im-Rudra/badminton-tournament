@@ -135,3 +135,15 @@ exports.teamsController = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.handleSaveHomepage = (req, res, next) => {
+  try {
+    const { blocks } = req.body;
+    console.log(blocks);
+    setTimeout(() => {
+      res.send(blocks);
+    }, 2000);
+  } catch (error) {
+    next(error);
+  }
+};

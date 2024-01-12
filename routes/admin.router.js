@@ -5,7 +5,8 @@ const {
   createTournament,
   getAllTournaments,
   verifyTeamController,
-  teamsController
+  teamsController,
+  handleSaveHomepage
 } = require('../controllers/admin.controller');
 const Team = require('../models/team.model');
 const resError = require('../utilities/resError');
@@ -28,6 +29,8 @@ router.post('/getAllTournaments', checkAuth('Administrator'), getAllTournaments)
 router.post('/teams', checkAuth('Administrator'), teamsController);
 
 router.post('/verifyTeam', checkAuth('Administrator'), verifyTeamController);
+
+router.post('/save-homepage', checkAuth('Administrator'), handleSaveHomepage);
 
 // router.post(
 //   '/adminForceRegistration',
