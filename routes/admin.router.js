@@ -4,7 +4,7 @@ const {
   getUsersController,
   createTournament,
   getAllTournaments,
-  verifyTeamController,
+  verifyAdminTeamController: verifyTeamController,
   teamsController,
   handleSaveHomepage
 } = require('../controllers/admin.controller');
@@ -28,7 +28,7 @@ router.post('/getAllTournaments', checkAuth('Administrator'), getAllTournaments)
 
 router.post('/teams', checkAuth('Administrator'), teamsController);
 
-router.post('/verifyTeam', checkAuth('Administrator'), verifyTeamController);
+router.post('/verifyTeamAdmin', checkAuth('Administrator'), verifyTeamController);
 
 router.post('/save-homepage', checkAuth('Administrator'), handleSaveHomepage);
 
