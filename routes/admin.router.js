@@ -1,15 +1,12 @@
 const checkAuth = require('../authentication/auth');
-const authSchema = require('../authentication/auth.schema');
 const {
   getUsersController,
   createTournament,
   getAllTournaments,
-  verifyAdminTeamController: verifyTeamController,
+  verifyTeamController,
   teamsController,
   handleSaveHomepage
 } = require('../controllers/admin.controller');
-const Team = require('../models/team.model');
-const resError = require('../utilities/resError');
 const inputValidator = require('../validation');
 const inputSchema = require('../validation/validationSchema');
 const router = require('express').Router();
