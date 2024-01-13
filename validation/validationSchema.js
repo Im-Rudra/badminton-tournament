@@ -46,6 +46,10 @@ const schemas = {
   verifyTeam: Joi.object({
     teamId: Joi.string().hex().length(24).required(),
     sessionId: Joi.string().required()
+  }),
+  saveHomepage: Joi.object({
+    id: Joi.string().hex().length(24),
+    blocks: Joi.string().required()
   })
 };
 
