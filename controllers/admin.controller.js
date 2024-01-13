@@ -1,3 +1,4 @@
+const Homepage = require('../models/homepage.model');
 const Team = require('../models/team.model');
 const Tournament = require('../models/tournament.model');
 const User = require('../models/user.model');
@@ -135,13 +136,18 @@ exports.teamsController = async (req, res, next) => {
   }
 };
 
-exports.handleSaveHomepage = (req, res, next) => {
+exports.saveHomepage = async (req, res, next) => {
   try {
-    const { blocks } = req.body;
-    console.log(blocks);
-    setTimeout(() => {
-      res.send(blocks);
-    }, 2000);
+    const { id, blocks } = req.body;
+    if (id) {
+      const resp = await Homepage.findByIdAndUpdate(id, { blocks });
+      return res.json(resp);
+    }
+    const newHomepage = new Homepage({ blocks });
+    const response = await newHomepage.save({});
+    if (response._id) {
+      return res.json(response);
+    }
   } catch (error) {
     next(error);
   }
