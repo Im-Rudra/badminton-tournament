@@ -11,6 +11,7 @@ const resError = require('../utilities/resError');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const Homepage = require('../models/homepage.model');
 
 require('dotenv').config();
 
@@ -388,6 +389,16 @@ exports.verifyTeamController = async (req, res, next) => {
     });
 
     res.json({ success: true, message: 'team verification successful' });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
+  }
+};
+
+exports.handleGetHomepage = async (req, res, next) => {
+  try {
+    const dbRes = await Homepage.find();
+    return res.json(dbRes);
   } catch (error) {
     console.log(error.message);
     next(error);

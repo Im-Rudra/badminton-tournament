@@ -16,7 +16,8 @@ const {
   getMyRegistrations,
   deleteTeamController,
   checkoutSessionController,
-  verifyTeamController
+  verifyTeamController,
+  handleGetHomepage
 } = require('../controllers/user.controller');
 const checkAuth = require('../authentication/auth');
 const issueToken = require('../middlewares/issueToken');
@@ -75,11 +76,14 @@ router.post(
   checkoutSessionController
 );
 
-router.post(
-  '/verifyTeam',
-  checkAuth('User'),
-  inputValidator(inputSchema.verifyTeam),
-  verifyTeamController
-);
+// implimented for automatic payment success-page of frontend
+// router.post(
+//   '/verifyTeam',
+//   checkAuth('User'),
+//   inputValidator(inputSchema.verifyTeam),
+//   verifyTeamController
+// );
+
+router.get('/homepage', handleGetHomepage);
 
 module.exports = router;
