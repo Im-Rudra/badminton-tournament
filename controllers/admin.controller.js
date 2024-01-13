@@ -81,7 +81,6 @@ exports.verifyTeamController = async (req, res, next) => {
   try {
     const { team } = req.body;
 
-    // console.log(team);
     // res.send(team);
     const dbRes = await Team.findByIdAndUpdate(team, { paymentStatus: 'Verified' });
     if (dbRes?._id) {
