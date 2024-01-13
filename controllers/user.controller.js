@@ -270,7 +270,7 @@ exports.deleteTeamController = async (req, res, next) => {
     const { teamId } = req.body;
     const team = await Team.findById(teamId);
     if (!team._id) {
-      return res.json(new resError('team not found', 'team-not-found')).status(400);
+      return res.status(400).json(new resError('team not found', 'team-not-found'));
     }
     // console.log(team.teamLeader.toString(), req.user._id.toString());
     if (team.teamLeader.toString() !== req.user._id.toString()) {
