@@ -152,3 +152,19 @@ exports.saveHomepage = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.toggleTournamentStatus = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const { status } = req.body;
+    if (!id) throw new Error('Wrong tournament id');
+    const newTournament = await Tournament.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+    res.json(newTournament);
+  } catch (error) {
+    next(error);
+  }
+};

@@ -50,6 +50,9 @@ const schemas = {
   saveHomepage: Joi.object({
     id: Joi.string().hex().length(24),
     blocks: Joi.string().required()
+  }),
+  toggleTournamentStatus: Joi.object({
+    status: Joi.string().valid('Open', 'Closed').required()
   })
 };
 

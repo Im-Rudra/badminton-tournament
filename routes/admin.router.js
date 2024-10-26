@@ -5,7 +5,8 @@ const {
   getAllTournaments,
   verifyTeamController,
   teamsController,
-  saveHomepage
+  saveHomepage,
+  toggleTournamentStatus
 } = require('../controllers/admin.controller');
 const inputValidator = require('../validation');
 const inputSchema = require('../validation/validationSchema');
@@ -28,6 +29,13 @@ router.post('/teams', checkAuth('Administrator'), teamsController);
 router.post('/verifyTeamAdmin', checkAuth('Administrator'), verifyTeamController);
 
 router.post('/save-homepage', checkAuth('Administrator'), saveHomepage);
+
+router.put(
+  '/toggle-tournament-status/:id',
+  inputValidator(inputSchema.toggleTournamentStatus),
+  checkAuth('Administrator'),
+  toggleTournamentStatus
+);
 
 // router.post(
 //   '/adminForceRegistration',
