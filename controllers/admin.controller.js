@@ -100,9 +100,9 @@ exports.verifyTeamController = async (req, res, next) => {
         .skip(skip)
         .limit(limit);
 
-      res.json(teams);
+      return res.json(teams);
     }
-    res.json(new resError('Something went wrong'));
+    return res.status(400).json({ error: 'Something went wrong' });
   } catch (err) {
     console.log(err.message);
     next(err);
