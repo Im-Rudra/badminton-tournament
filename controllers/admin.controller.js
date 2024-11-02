@@ -80,10 +80,14 @@ exports.adminForceRegistration = async (req, res, next) => {
 
 exports.verifyTeamController = async (req, res, next) => {
   try {
-    const { team } = req.body;
+    const { teamId, status } = req.body;
 
     // res.send(team);
-    const dbRes = await Team.findByIdAndUpdate(team, { paymentStatus: 'Verified' });
+    const dbRes = await Team.findByIdAndUpdate(
+      teamId, 
+      { paymentStatus: status }, 
+      { new: true }
+    );
     if (dbRes?._id) {
       const { tournament, pagination, filters } = req.body;
       let filterDoc = {};
@@ -113,8 +117,13 @@ exports.verifyTeamController = async (req, res, next) => {
 exports.teamsController = async (req, res, next) => {
   // console.log(req.body);
   try {
-    const { tournament, pagination, filters } = req.body;
-    let filterDoc = {};
+    const { tournamentId, pagination, filters } = req.body;
+
+    const tournament = await Tournament
+      .findById(tournamentId)
+      .lean();
+    
+    const filterDoc = {};
     if (filters?.paymentStatus) {
       filterDoc.paymentStatus = filters.paymentStatus;
     } else if (filters?.teamType) {
@@ -123,12 +132,12 @@ exports.teamsController = async (req, res, next) => {
     // console.log(filterDoc);
     const limit = pagination?.pageSize ? pagination.pageSize : 10;
     const skip = pagination?.current ? (pagination?.current - 1) * limit : 0;
-    const teams = await Team.find({ tournament, ...filterDoc })
+    const teams = await Team.find({ tournament: tournamentId, ...filterDoc })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-    const totalTeams = await Team.count();
-    res.json({ totalTeams, teams });
+    const totalTeams = await Team.count(filterDoc);
+    res.json({ totalTeams, teams, tournament });
     // console.log(teams);
   } catch (err) {
     console.log(err.message);
