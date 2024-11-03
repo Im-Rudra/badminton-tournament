@@ -6,7 +6,8 @@ const {
   verifyTeamController,
   teamsController,
   saveHomepage,
-  toggleTournamentStatus
+  toggleTournamentStatus,
+  makeAdmin
 } = require('../controllers/admin.controller');
 const inputValidator = require('../validation');
 const inputSchema = require('../validation/validationSchema');
@@ -36,6 +37,8 @@ router.put(
   checkAuth('Administrator'),
   toggleTournamentStatus
 );
+
+router.put('/make-admin/:userId', checkAuth("Administrator"), makeAdmin);
 
 // router.post(
 //   '/adminForceRegistration',

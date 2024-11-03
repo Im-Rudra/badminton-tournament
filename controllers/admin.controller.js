@@ -171,9 +171,42 @@ exports.toggleTournamentStatus = async (req, res, next) => {
       id,
       { status },
       { new: true }
-    );
+    ).lean();
     res.json(newTournament);
   } catch (error) {
     next(error);
   }
 };
+
+exports.makeAdmin = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      return res
+      .status(400)
+      .json({ 
+        message: "Bad request. Check request Params!", 
+        status: 400, 
+        error: true 
+      });
+    }
+    const newUser = await User.findByIdAndUpdate(
+      userId,
+      { role: "Administrator" },
+      { new: true }
+    );
+    if (!newUser || !newUser._id) {
+      return res
+        .status(500)
+        .json({
+          message: "Something went wrong with making admin!",
+          status: 500,
+          error: true
+        });
+      }
+    return res.json(makeUserObj(newUser));
+  } catch (error) {
+    console.error(error.message);
+    next(error);
+  }
+}
