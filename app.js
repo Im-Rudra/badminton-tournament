@@ -100,7 +100,7 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
   res.status(err.status || 500);
-  console.log(err);
+  console.log(err.message);
   return res.json({
     error: err,
     message: err.message

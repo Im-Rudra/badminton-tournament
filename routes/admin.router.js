@@ -1,37 +1,52 @@
-const checkAuth = require('../authentication/auth');
+const checkAuth = require("../authentication/auth");
+const { ROLES } = require("../constants");
 const {
   getUsersController,
   createTournament,
   getAllTournaments,
   verifyTeamController,
   teamsController,
-  saveHomepage
-} = require('../controllers/admin.controller');
-const inputValidator = require('../validation');
-const inputSchema = require('../validation/validationSchema');
-const router = require('express').Router();
+  saveHomepage,
+  toggleTournamentStatus,
+  makeAdmin,
+  exportExcel,
+} = require("../controllers/admin.controller");
+const inputValidator = require("../validation");
+const inputSchema = require("../validation/validationSchema");
+const router = require("express").Router();
 
 //  protected route | admin can access this route
-router.post('/getUsers', checkAuth('Administrator'), getUsersController);
+router.post("/getUsers", checkAuth(ROLES.ADMIN), getUsersController);
 
 router.post(
-  '/createTournament',
+  "/createTournament",
   inputValidator(inputSchema.createTournament),
-  checkAuth('Administrator'),
-  createTournament
+  checkAuth(ROLES.ADMIN),
+  createTournament,
 );
 
-router.post('/getAllTournaments', checkAuth('Administrator'), getAllTournaments);
+router.post("/getAllTournaments", checkAuth(ROLES.ADMIN), getAllTournaments);
 
-router.post('/teams', checkAuth('Administrator'), teamsController);
+router.post("/teams", checkAuth(ROLES.ADMIN), teamsController);
 
-router.post('/verifyTeamAdmin', checkAuth('Administrator'), verifyTeamController);
+router.post("/verifyTeamAdmin", checkAuth(ROLES.ADMIN), verifyTeamController);
 
-router.post('/save-homepage', checkAuth('Administrator'), saveHomepage);
+router.post("/save-homepage", checkAuth(ROLES.ADMIN), saveHomepage);
+
+router.put(
+  "/toggle-tournament-status/:id",
+  inputValidator(inputSchema.toggleTournamentStatus),
+  checkAuth(ROLES.ADMIN),
+  toggleTournamentStatus,
+);
+
+router.put("/make-admin/:userId", checkAuth(ROLES.ADMIN), makeAdmin);
+
+router.get("/export-excel/:tournamentId", checkAuth(ROLES.ADMIN), exportExcel);
 
 // router.post(
 //   '/adminForceRegistration',
-//   checkAuth(authSchema, 'Administrator'),
+//   checkAuth(authSchema, ROLES.ADMIN),
 //   inputValidator(inputSchema.registerSchema),
 //   adminForceRegistration
 // );

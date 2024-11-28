@@ -1,9 +1,11 @@
-const Homepage = require('../models/homepage.model');
-const Team = require('../models/team.model');
-const Tournament = require('../models/tournament.model');
-const User = require('../models/user.model');
-const makeUserObj = require('../utilities/makeUserObj');
-const resError = require('../utilities/resError');
+const { excelSpecification } = require("../constants");
+const Homepage = require("../models/homepage.model");
+const Team = require("../models/team.model");
+const Tournament = require("../models/tournament.model");
+const User = require("../models/user.model");
+const makeUserObj = require("../utilities/makeUserObj");
+const resError = require("../utilities/resError");
+const excel = require("node-excel-export");
 
 exports.getUsersController = async (req, res, next) => {
   try {
@@ -26,7 +28,11 @@ exports.getUsersController = async (req, res, next) => {
 
 exports.createTournament = async (req, res, next) => {
   try {
-    const newTournament = new Tournament({ creator: req.user.id, status: 'Open', ...req.body });
+    const newTournament = new Tournament({
+      creator: req.user.id,
+      status: "Open",
+      ...req.body,
+    });
     const dbRes = await newTournament.save();
     res.json(dbRes);
   } catch (err) {
@@ -41,7 +47,7 @@ exports.getAllTournaments = async (req, res, next) => {
   try {
     const dbRes = await Tournament.find()
       .sort({ createdAt: -1 })
-      .populate({ path: 'creator', select: 'firstName lastName' });
+      .populate({ path: "creator", select: "firstName lastName" });
     res.json(dbRes);
   } catch (err) {
     console.log(err);
@@ -55,12 +61,14 @@ exports.adminForceRegistration = async (req, res, next) => {
     // if the user already exists
     const user = await User.find({ $or: [{ email }, { phone }] });
     if (user?._id) {
-      return res.json(new resError('Email or phone Already Exists'));
+      return res.json(new resError("Email or phone Already Exists"));
     }
 
     bcrypt.hash(password, saltRounds, async (err, hash) => {
       if (err) {
-        return res.status(500).json(new resError('An unknown error occured on the server!'));
+        return res
+          .status(500)
+          .json(new resError("An unknown error occured on the server!"));
       }
       const newUser = new User({ ...rest, email, phone, hash });
       const dbRes = await newUser.save();
@@ -80,10 +88,14 @@ exports.adminForceRegistration = async (req, res, next) => {
 
 exports.verifyTeamController = async (req, res, next) => {
   try {
-    const { team } = req.body;
+    const { teamId, status } = req.body;
 
     // res.send(team);
-    const dbRes = await Team.findByIdAndUpdate(team, { paymentStatus: 'Verified' });
+    const dbRes = await Team.findByIdAndUpdate(
+      teamId,
+      { paymentStatus: status },
+      { new: true },
+    );
     if (dbRes?._id) {
       const { tournament, pagination, filters } = req.body;
       let filterDoc = {};
@@ -100,9 +112,9 @@ exports.verifyTeamController = async (req, res, next) => {
         .skip(skip)
         .limit(limit);
 
-      res.json(teams);
+      return res.json(teams);
     }
-    res.json(new resError('Something went wrong'));
+    return res.status(400).json({ error: "Something went wrong" });
   } catch (err) {
     console.log(err.message);
     next(err);
@@ -113,8 +125,11 @@ exports.verifyTeamController = async (req, res, next) => {
 exports.teamsController = async (req, res, next) => {
   // console.log(req.body);
   try {
-    const { tournament, pagination, filters } = req.body;
-    let filterDoc = {};
+    const { tournamentId, pagination, filters } = req.body;
+
+    const tournament = await Tournament.findById(tournamentId).lean();
+
+    const filterDoc = {};
     if (filters?.paymentStatus) {
       filterDoc.paymentStatus = filters.paymentStatus;
     } else if (filters?.teamType) {
@@ -123,12 +138,12 @@ exports.teamsController = async (req, res, next) => {
     // console.log(filterDoc);
     const limit = pagination?.pageSize ? pagination.pageSize : 10;
     const skip = pagination?.current ? (pagination?.current - 1) * limit : 0;
-    const teams = await Team.find({ tournament, ...filterDoc })
+    const teams = await Team.find({ tournament: tournamentId, ...filterDoc })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-    const totalTeams = await Team.count();
-    res.json({ totalTeams, teams });
+    const totalTeams = await Team.count(filterDoc);
+    res.json({ totalTeams, teams, tournament });
     // console.log(teams);
   } catch (err) {
     console.log(err.message);
@@ -148,6 +163,75 @@ exports.saveHomepage = async (req, res, next) => {
     if (response._id) {
       return res.json(response);
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.toggleTournamentStatus = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const { status } = req.body;
+    if (!id) throw new Error("Wrong tournament id");
+    const newTournament = await Tournament.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true },
+    ).lean();
+    res.json(newTournament);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.makeAdmin = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      return res.status(400).json({
+        message: "Bad request. Check request Params!",
+        status: 400,
+        error: true,
+      });
+    }
+    const newUser = await User.findByIdAndUpdate(
+      userId,
+      { role: "Administrator" },
+      { new: true },
+    );
+    if (!newUser || !newUser._id) {
+      return res.status(500).json({
+        message: "Something went wrong with making admin!",
+        status: 500,
+        error: true,
+      });
+    }
+    return res.json(makeUserObj(newUser));
+  } catch (error) {
+    console.error(error.message);
+    next(error);
+  }
+};
+
+exports.exportExcel = async (req, res, next) => {
+  try {
+    const { tournamentId } = req.params;
+    const teams = await Team.find({ tournament: tournamentId });
+
+    const report = excel.buildExport([
+      {
+        name: "Teams",
+        data: teams,
+        specification: excelSpecification,
+      },
+    ]);
+
+    res.setHeader("Content-Disposition", "attachment; filename=teams.xlsx");
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+    res.send(report);
   } catch (error) {
     next(error);
   }

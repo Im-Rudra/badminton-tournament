@@ -24,6 +24,7 @@
     "lodash": "^4.17.21",
     "mongoose": "^6.8.1",
     "morgan": "^1.10.0",
+    "node-excel-export": "^1.4.4",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "stripe": "^14.5.0",

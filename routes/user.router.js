@@ -10,7 +10,7 @@ const {
   loginController,
   logoutController,
   getLoggedInUser,
-  getTournament,
+  getTournaments,
   teamRegistration,
   checkTeamRegistrablity,
   getMyRegistrations,
@@ -56,7 +56,7 @@ router.post(
   teamRegistration
 );
 
-router.post('/getTournament', checkAuth('User'), getTournament);
+router.get('/open-tournaments', checkAuth('User'), getTournaments);
 
 router.post('/logout', logoutController);
 

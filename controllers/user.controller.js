@@ -1,8 +1,6 @@
 //  internal imports
 const User = require('../models/user.model');
-const ResponseMsg = require('../libs/responseMsg');
 const makeUserObj = require('../utilities/makeUserObj');
-const makeError = require('../utilities/error');
 const Tournament = require('../models/tournament.model');
 const Team = require('../models/team.model');
 const resError = require('../utilities/resError');
@@ -119,22 +117,17 @@ exports.getLoggedInUser = async (req, res, next) => {
     const userObj = makeUserObj(user);
     res.json(userObj);
   } catch (err) {
-    console.log(err.message);
+    // console.log(err.message);
     next(err);
   }
 };
 
-exports.getTournament = async (req, res, next) => {
-  // console.log('helo');
-  // return;
+exports.getTournaments = async (req, res, next) => {
   try {
-    const dbRes = await Tournament.findOne({ status: 'Open' })
+    const dbRes = await Tournament.find({ status: 'Open' })
       .sort({ createdAt: -1 })
-      .limit(1)
       .populate({ path: 'creator', select: 'firstName lastName' });
-    if (!dbRes?._id) {
-      return res.json(new resError('No Tournament Found!'));
-    }
+
     res.json(dbRes);
   } catch (err) {
     console.log(err);
@@ -172,7 +165,8 @@ exports.teamRegistration = async (req, res, next) => {
       incrementDoc.doubleTeams = 1;
     }
 
-    await Tournament.findByIdAndUpdate(tournament, { $inc: incrementDoc });
+    const updatedTournament = await Tournament.findByIdAndUpdate(tournament, { $inc: incrementDoc });
+    dbRes.tournament = updatedTournament;
 
     res.json(dbRes);
   } catch (err) {

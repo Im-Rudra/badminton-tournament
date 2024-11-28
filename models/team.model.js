@@ -1,7 +1,5 @@
 const { Schema, SchemaTypes, model } = require('mongoose');
 
-const setter = (val) => new Date(val).getFullYear();
-
 const teamSchema = new Schema(
   {
     teamName: {
