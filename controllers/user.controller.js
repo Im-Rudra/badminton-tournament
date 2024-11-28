@@ -117,7 +117,7 @@ exports.getLoggedInUser = async (req, res, next) => {
     const userObj = makeUserObj(user);
     res.json(userObj);
   } catch (err) {
-    console.log(err.message);
+    // console.log(err.message);
     next(err);
   }
 };
