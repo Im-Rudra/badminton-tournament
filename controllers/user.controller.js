@@ -186,12 +186,12 @@ exports.checkTeamRegistrablity = async (req, res, next) => {
     if (!tournament?._id) {
       return res
         .json(
-          new resError("Tournament doesn't exist!", 'tournament-not-found', '/team-registration')
+          new resError("Tournament doesn't exist!", 'tournament-not-found', '/')
         )
         .status(404);
     } else if (tournament?.status === 'Closed') {
       return res
-        .json(new resError('Tournament closed already', 'tournament-closed', '/team-registration'))
+        .json(new resError('Tournament closed already', 'tournament-closed', '/'))
         .status(404);
     }
 
@@ -211,7 +211,7 @@ exports.checkTeamRegistrablity = async (req, res, next) => {
 
     if (verdictObj.Single && verdictObj.Double) {
       return res.json(
-        new resError('Team not registrable', 'team-not-registrable', '/team-registration')
+        new resError('Team not registrable', 'team-not-registrable', '/')
       );
     }
 
@@ -219,7 +219,7 @@ exports.checkTeamRegistrablity = async (req, res, next) => {
       const { teamType } = req.body;
       if (verdictObj[teamType]) {
         return res.json(
-          new resError(`Not eligible for ${teamType} team`, 'not-eligible', '/team-registration')
+          new resError(`Not eligible for ${teamType} team`, 'not-eligible', '/')
         );
       }
     }
