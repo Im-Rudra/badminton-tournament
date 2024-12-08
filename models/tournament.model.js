@@ -39,6 +39,15 @@ const tournamentSchema = new Schema(
       type: Number,
       required: true
     },
+    description: {
+      type: String,
+      required: true
+    },
+    paymentPhoneNumber: {
+      type: String,
+      match: /^(?!.*--)[0-9-]+$/,
+      required: true
+    },
     tournamentYear: {
       type: String,
       default: () => new Date().getFullYear(),

@@ -10,6 +10,7 @@ const {
   toggleTournamentStatus,
   makeAdmin,
   exportExcel,
+  deleteTeamController,
 } = require("../controllers/admin.controller");
 const inputValidator = require("../validation");
 const inputSchema = require("../validation/validationSchema");
@@ -43,6 +44,13 @@ router.put(
 router.put("/make-admin/:userId", checkAuth(ROLES.ADMIN), makeAdmin);
 
 router.get("/export-excel/:tournamentId", checkAuth(ROLES.ADMIN), exportExcel);
+
+router.delete(
+  '/deleteTeam/:teamId',
+  checkAuth(ROLES.ADMIN),
+  // inputValidator(inputSchema.deleteTeam),
+  deleteTeamController
+);
 
 // router.post(
 //   '/adminForceRegistration',

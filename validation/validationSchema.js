@@ -28,7 +28,9 @@ const schemas = {
     endTime: Joi.date().required(),
     singlePlayerEntryFee: Joi.number().required(),
     doublePlayerEntryFee: Joi.number().required(),
-    tournamentYear: Joi.string()
+    tournamentYear: Joi.string(),
+    description: Joi.string(),
+    paymentPhoneNumber: Joi.string().required(),
   }),
   teamRegistration: Joi.object({
     tournament: Joi.string().hex().length(24).required(),
