@@ -56,18 +56,11 @@ router.post(
   teamRegistration
 );
 
-router.get('/open-tournaments', checkAuth('User'), getTournaments);
+router.get('/open-tournaments', getTournaments);
 
 router.post('/logout', logoutController);
 
 router.get('/myRegistrations', checkAuth('User'), getMyRegistrations);
-
-router.post(
-  '/deleteTeam',
-  checkAuth('User'),
-  inputValidator(inputSchema.deleteTeam),
-  deleteTeamController
-);
 
 router.post(
   '/create-checkout-session',
